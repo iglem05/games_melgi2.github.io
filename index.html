@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Permainan Bahasa Indonesia - SD</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f2f9ff;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        h1 {
+            color: #0066cc;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        .game-container {
+            max-width: 700px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .category-selector {
+            margin-bottom: 20px;
+        }
+        .category-btn {
+            padding: 8px 15px;
+            margin: 0 5px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .category-btn.active {
+            background-color: #0066cc;
+            color: white;
+        }
+        .question-container {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f0f8ff;
+            border-radius: 10px;
+        }
+        .question {
+            font-size: 24px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+        .hint {
+            font-size: 16px;
+            color: #666;
+            font-style: italic;
+            margin-bottom: 15px;
+        }
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .option {
+            padding: 10px 15px;
+            font-size: 18px;
+            background-color: #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            text-align: left;
+        }
+        .option:hover {
+            background-color: #d0d0d0;
+        }
+        .message {
+            font-size: 20px;
+            height: 30px;
+            margin: 15px 0;
+        }
+        .success {
+            color: #4caf50;
+        }
+        .try-again {
+            color: #f44336;
+        }
+        .score-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            font-size: 18px;
+        }
+        .next-button {
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 15px;
+            display: none;
+        }
+        .next-button:hover {
+            background-color: #3e8e41;
+        }
+        .explanation {
+            margin-top: 15px;
+            font-size: 16px;
+            color: #666;
+            text-align: left;
+            background-color: #f9f9f9;
+            padding: 10px;
+            border-radius: 8px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Permainan Bahasa Indonesia</h1>
+    
+    <div class="game-container">
+        <div class="category-selector">
+            <button class="category-btn active" data-category="sinonim">Sinonim</button>
+            <button class="category-btn" data-category="antonim">Antonim</button>
+            <button class="category-btn" data-category="ejaan">Ejaan</button>
+            <button class="category-btn" data-category="peribahasa">Peribahasa</button>
+        </div>
+        
+        <div class="question-container">
+            <div class="question" id="question"></div>
+            <div class="hint" id="hint"></div>
+        </div>
+        
+        <div class="message" id="message"></div>
+        
+        <div class="options-container" id="options-container"></div>
+        
+        <div class="explanation" id="explanation"></div>
+        
+        <button id="next-button" class="next-button">Soal Berikutnya</button>
+        
+        <div class="score-container">
+            <div>Benar: <span id="correct-count">0</span></div>
+            <div>Skor: <span id="score">0</span></div>
+            <div>Salah: <span id="wrong-count">0</span></div>
+        </div>
+    </div>
+    <footer>
+        by <strong>Melgi Saloko</strong>
+      </footer>
+    <script>
+        // Data permainan
+        const gameData = {
+            sinonim: [
+                {
+                    question: "Apa sinonim dari kata 'Bahagia'?",
+                    options: ["Senang", "Sedih", "Marah", "Takut"],
+                    answer: "Senang",
+                    explanation: "Bahagia dan Senang memiliki arti yang sama yaitu perasaan gembira atau riang."
+                },
+                {
+                    question: "Apa sinonim dari kata 'Cepat'?",
+                    options: ["Lambat", "Lekas", "Pelan", "Santai"],
+                    answer: "Lekas",
+                    explanation: "Cepat dan Lekas memiliki arti yang sama yaitu dalam waktu singkat atau segera."
+                },
+                {
+                    question: "Apa sinonim dari kata 'Cantik'?",
+                    options: ["Jelek", "Indah", "Kotor", "Buruk"],
+                    answer: "Indah",
+                    explanation: "Cantik dan Indah memiliki arti yang mirip yaitu enak dipandang atau sedap dilihat."
+                },
+                {
+                    question: "Apa sinonim dari kata 'Pintar'?",
+                    options: ["Pandai", "Bodoh", "Lemah", "Malas"],
+                    answer: "Pandai",
+                    explanation: "Pintar dan Pandai memiliki arti yang sama yaitu cepat menangkap pelajaran dan mengerti sesuatu."
+                },
+                {
+                    question: "Apa sinonim dari kata 'Besar'?",
+                    options: ["Kecil", "Mungil", "Raksasa", "Sempit"],
+                    answer: "Raksasa",
+                    explanation: "Besar dan Raksasa memiliki arti yang mirip yaitu berukuran lebih dari ukuran sedang atau rata-rata."
+                }
+            ],
+            antonim: [
+                {
+                    question: "Apa antonim dari kata 'Tinggi'?",
+                    options: ["Pendek", "Panjang", "Besar", "Kurus"],
+                    answer: "Pendek",
+                    explanation: "Tinggi berarti jauh dari permukaan, sedangkan Pendek adalah kebalikannya."
+                },
+                {
+                    question: "Apa antonim dari kata 'Siang'?",
+                    options: ["Pagi", "Sore", "Malam", "Fajar"],
+                    answer: "Malam",
+                    explanation: "Siang adalah waktu ketika matahari bersinar, sedangkan Malam adalah kebalikannya ketika matahari telah terbenam."
+                },
+                {
+                    question: "Apa antonim dari kata 'Baru'?",
+                    options: ["Tua", "Muda", "Lama", "Kuno"],
+                    answer: "Lama",
+                    explanation: "Baru berarti belum pernah ada sebelumnya, sedangkan Lama berarti sudah berumur atau sudah lama ada."
+                },
+                {
+                    question: "Apa antonim dari kata 'Kaya'?",
+                    options: ["Miskin", "Mewah", "Mahal", "Murah"],
+                    answer: "Miskin",
+                    explanation: "Kaya berarti memiliki harta benda yang banyak, sedangkan Miskin berarti tidak berharta atau serba kekurangan."
+                },
+                {
+                    question: "Apa antonim dari kata 'Rajin'?",
+                    options: ["Sibuk", "Giat", "Tekun", "Malas"],
+                    answer: "Malas",
+                    explanation: "Rajin berarti suka bekerja atau belajar dengan sungguh-sungguh, sedangkan Malas berarti segan melakukan sesuatu."
+                }
+            ],
+            ejaan: [
+                {
+                    question: "Manakah penulisan yang benar?",
+                    options: ["Sistim", "System", "Sistem", "Sistiim"],
+                    answer: "Sistem",
+                    explanation: "Penulisan yang benar adalah 'Sistem' sesuai dengan Pedoman Umum Ejaan Bahasa Indonesia (PUEBI)."
+                },
+                {
+                    question: "Manakah penulisan yang benar?",
+                    options: ["Praktek", "Praktik", "Prakttek", "Praktuk"],
+                    answer: "Praktik",
+                    explanation: "Penulisan yang benar adalah 'Praktik' sesuai dengan Pedoman Umum Ejaan Bahasa Indonesia (PUEBI)."
+                },
+                {
+                    question: "Manakah penulisan yang benar?",
+                    options: ["Aquarium", "Akwarium", "Akuarium", "Aqwarium"],
+                    answer: "Akuarium",
+                    explanation: "Penulisan yang benar adalah 'Akuarium' sesuai dengan Pedoman Umum Ejaan Bahasa Indonesia (PUEBI)."
+                },
+                {
+                    question: "Manakah penulisan yang benar?",
+                    options: ["Apotik", "Apotek", "Apothek", "Apotec"],
+                    answer: "Apotek",
+                    explanation: "Penulisan yang benar adalah 'Apotek' sesuai dengan Pedoman Umum Ejaan Bahasa Indonesia (PUEBI)."
+                },
+                {
+                    question: "Manakah penulisan yang benar?",
+                    options: ["Ijasah", "Ijazah", "Ijasahh", "Izasah"],
+                    answer: "Ijazah",
+                    explanation: "Penulisan yang benar adalah 'Ijazah' sesuai dengan Pedoman Umum Ejaan Bahasa Indonesia (PUEBI)."
+                }
+            ],
+            peribahasa: [
+                {
+                    question: "Lengkapi peribahasa: 'Ada gula, ada _____'",
+                    options: ["Manis", "Garam", "Semut", "Lalat"],
+                    answer: "Semut",
+                    explanation: "Peribahasa lengkapnya adalah 'Ada gula, ada semut' yang bermakna di mana ada keuntungan di situ orang akan berdatangan."
+                },
+                {
+                    question: "Lengkapi peribahasa: 'Besar _____ daripada tiang'",
+                    options: ["Batang", "Pasak", "Rumah", "Pohon"],
+                    answer: "Pasak",
+                    explanation: "Peribahasa lengkapnya adalah 'Besar pasak daripada tiang' yang bermakna pengeluaran lebih besar daripada pendapatan."
+                },
+                {
+                    question: "Lengkapi peribahasa: '_____ di dalam tepung'",
+                    options: ["Telur", "Jarum", "Garam", "Gula"],
+                    answer: "Jarum",
+                    explanation: "Peribahasa lengkapnya adalah 'Jarum di dalam tepung' yang bermakna suatu kejahatan yang tersembunyi pasti akan ketahuan juga akhirnya."
+                },
+                {
+                    question: "Lengkapi peribahasa: 'Seperti _____ dalam sangkar'",
+                    options: ["Kucing", "Burung", "Anjing", "Hamster"],
+                    answer: "Burung",
+                    explanation: "Peribahasa lengkapnya adalah 'Seperti burung dalam sangkar' yang bermakna hidup dalam keadaan yang berkecukupan tetapi tidak memiliki kebebasan."
+                },
+                {
+                    question: "Lengkapi peribahasa: 'Air beriak tanda tak _____'",
+                    options: ["Dalam", "Jernih", "Kotor", "Dangkal"],
+                    answer: "Dalam",
+                    explanation: "Peribahasa lengkapnya adalah 'Air beriak tanda tak dalam' yang bermakna orang yang banyak bicara biasanya sedikit ilmunya."
+                }
+            ]
+        };
+        
+        let currentCategory = 'sinonim';
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let correctCount = 0;
+        let wrongCount = 0;
+        let gameActive = true;
+        
+        // Initialize the game
+        function init() {
+            // Set up category buttons
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentCategory = btn.dataset.category;
+                    resetCategory();
+                    displayQuestion();
+                });
+            });
+            
+            // Set up next button
+            document.getElementById('next-button').addEventListener('click', () => {
+                document.getElementById('next-button').style.display = 'none';
+                document.getElementById('explanation').style.display = 'none';
+                nextQuestion();
+                gameActive = true;
+            });
+            
+            // Start game
+            displayQuestion();
+        }
+        
+        function resetCategory() {
+            currentQuestionIndex = 0;
+            displayMessage('');
+            document.getElementById('explanation').style.display = 'none';
+        }
+        
+        function displayQuestion() {
+            const currentQuestions = gameData[currentCategory];
+            
+            if (currentQuestionIndex >= currentQuestions.length) {
+                currentQuestionIndex = 0;
+            }
+            
+            const questionData = currentQuestions[currentQuestionIndex];
+            
+            document.getElementById('question').textContent = questionData.question;
+            
+            // Set hint based on category
+            let hintText = '';
+            switch (currentCategory) {
+                case 'sinonim':
+                    hintText = 'Pilih kata yang memiliki arti yang sama atau hampir sama';
+                    break;
+                case 'antonim':
+                    hintText = 'Pilih kata yang artinya berlawanan';
+                    break;
+                case 'ejaan':
+                    hintText = 'Pilih ejaan yang benar sesuai PUEBI';
+                    break;
+                case 'peribahasa':
+                    hintText = 'Lengkapi peribahasa dengan kata yang tepat';
+                    break;
+            }
+            document.getElementById('hint').textContent = hintText;
+            
+            // Generate answer options
+            generateOptions(questionData);
+        }
+        
+        function generateOptions(questionData) {
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+            
+            // Shuffle options
+            const shuffledOptions = [...questionData.options].sort(() => Math.random() - 0.5);
+            
+            // Create option buttons
+            shuffledOptions.forEach(option => {
+                const optionEl = document.createElement('div');
+                optionEl.className = 'option';
+                optionEl.textContent = option;
+                optionEl.addEventListener('click', () => {
+                    if (!gameActive) return;
+                    
+                    const isCorrect = option === questionData.answer;
+                    
+                    if (isCorrect) {
+                        displayMessage('Benar!', 'success');
+                        optionEl.style.backgroundColor = '#4caf50';
+                        optionEl.style.color = 'white';
+                        score += 10;
+                        correctCount++;
+                    } else {
+                        displayMessage('Salah!', 'try-again');
+                        optionEl.style.backgroundColor = '#f44336';
+                        optionEl.style.color = 'white';
+                        wrongCount++;
+                        
+                        // Highlight correct answer
+                        document.querySelectorAll('.option').forEach(el => {
+                            if (el.textContent === questionData.answer) {
+                                el.style.backgroundColor = '#4caf50';
+                                el.style.color = 'white';
+                            }
+                        });
+                    }
+                    
+                    // Show explanation
+                    document.getElementById('explanation').textContent = questionData.explanation;
+                    document.getElementById('explanation').style.display = 'block';
+                    
+                    document.getElementById('score').textContent = score;
+                    document.getElementById('correct-count').textContent = correctCount;
+                    document.getElementById('wrong-count').textContent = wrongCount;
+                    
+                    gameActive = false;
+                    document.getElementById('next-button').style.display = 'block';
+                });
+                
+                optionsContainer.appendChild(optionEl);
+            });
+        }
+        
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex >= gameData[currentCategory].length) {
+                currentQuestionIndex = 0;
+            }
+            displayQuestion();
+        }
+        
+        function displayMessage(text, type) {
+            const messageEl = document.getElementById('message');
+            messageEl.textContent = text;
+            messageEl.className = 'message';
+            if (type) {
+                messageEl.classList.add(type);
+            }
+        }
+        
+        // Start the game
+        init();
+        currentQuestionIndex = Math.floor(Math.random() * currentQuestions.length);
+
+    </script>
+
+
+</body>
+</html>
